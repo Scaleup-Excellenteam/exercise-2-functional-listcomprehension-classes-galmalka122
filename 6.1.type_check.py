@@ -11,7 +11,7 @@ def type_check(correct_type):
 
   Returns:
       decorator (function): A decorator that takes a function and returns a 
-      Wrapped function that checks if the parameterpassed to the function
+      Wrapped function that checks if the parameter passed to the function
       Is of the correct type.
 
   Raises:
