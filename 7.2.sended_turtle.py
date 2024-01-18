@@ -14,14 +14,15 @@ class PostOffice:
       self.message_id = 0
       self.boxes = {user: [] for user in usernames}
       
-  def send_message(self, sender, recipient, message_body, urgent=False):
+  def send_message(self, sender, recipient, title, message_body='', urgent=False):
       """
       Send a message to a recipient.
 
       Args:
           sender (str): The message sender's username.
           recipient (str): The message recipient's username.
-          message_body (str): The body of the message.
+          title (str): The message's title.
+          message_body (str, optional): The body of the message.
           urgent (bool, optional): The urgency of the message.
                                   Urgent messages appear first.
 
@@ -37,7 +38,7 @@ class PostOffice:
           inbox.
 
           >>> po_box = PostOffice(['a', 'b'])
-          >>> message_id = po_box.send_message('a', 'b', 'Hello!')
+          >>> message_id = po_box.send_message('a', 'b', 'Hello!', 'How are you?')
           >>> len(po_box.boxes['b'])
           1
           >>> message_id
@@ -47,6 +48,7 @@ class PostOffice:
       self.message_id = self.message_id + 1
       message_details = {
           'id': self.message_id,
+          'title': title,
           'body': message_body,
           'sender': sender,
       }
@@ -58,7 +60,7 @@ class PostOffice:
     
   def add_user(self, username):
     """
-    Adds user to PO Boxes if the user does not exist.
+    Adds a user to PO Boxes if the user does not exist.
     
     Args:
       username (str): The user to add to PO Boxes.
@@ -79,30 +81,28 @@ class PostOffice:
     self.boxes.pop(username)
     
   def read_inbox(self, username, n = -1):
-    """Get the first n messages from user's box.
+    """Get the first n messages from the user's box.
 
       Args:
           username (str): The user of the message box.
           n (int): The number of messages to get. if Missing,
-                   Return all messages within inbox 
+                   Return all messages within the inbox 
 
       Returns:
-          list: The first n messages in user's box.
+          list: The first n messages in the user's box.
 
       Raises:
           KeyError: If the recipient does not exist.
 
       Examples:
-          After creating a PO box and reciving messages,
+          After creating a PO box and receiving messages,
           the recipient should get the n first messages.
           
           >>> po_box = PostOffice(['a', 'b'])
-          >>> po_box.send_message('a', 'b', 'Hello')
-          >>> po_box.send_message('a', 'b', 'World')
-          >>> po_box.send_message('a', 'b', '!')
-          >>> po_box.read_inbox('b', 2)
-          [{'id': 1, 'body': 'Hello', 'sender': 'a'},
-           {'id': 2, 'body': 'World', 'sender': 'a'}]
+          >>> po_box.send_message('a', 'b', 'Hello', 'How are you?')
+          >>> po_box.send_message('a', 'b', 'Hi', 'Fine thank you')
+          [{'id': 1, 'body': 'Hello', 'How are you?', 'sender': 'a'},
+           {'id': 2, 'body': 'Hi', 'Fine thank you', 'sender': 'a'}]
     """
     user_box = self.boxes[username]
     messages = [user_box[i] for i in range(len(user_box)) if i < n or n == -1]
@@ -110,7 +110,7 @@ class PostOffice:
   
   def search_inbox(self, username, substring):
     """
-    Get all messages from user's box contains the substring.
+    Get all messages from the user's box containing the substring.
 
     Args:
         username (str): The user of the message box.
@@ -125,19 +125,18 @@ class PostOffice:
         TypeError: If the substring is not type(str).
         
     Examples:
-        After creating a PO box and reciving letters,
-        the recipient should get the messages contains substring.
+        After creating a PO box and receiving letters,
+        the recipient should get the messages containing the substring.
         
         >>> po_box = PostOffice(['a', 'b'])
-        >>> po_box.send_message('a', 'b', 'Hello')
-        >>> po_box.send_message('a', 'b', 'World')
-        >>> po_box.send_message('a', 'b', '!')
-        >>> po_box.search_inbox('b', 'l')
-        [{'id': 1, 'body': 'Hello', 'sender': 'a'},
-         {'id': 2, 'body': 'World', 'sender': 'a'}]
-        >>> po_box.search_inbox('b', '!')
-        [{'id': 3, 'body': '!', 'sender': 'a'}]
+        >>> po_box.send_message('a', 'b', 'Hello', 'How are you?')
+        >>> po_box.send_message('a', 'b', 'Hi', 'Fine thank you')
+        >>> po_box.search_inbox('b', 'H')
+        [{'id': 1, 'title': 'Hello', 'body': 'How are you', 'sender': 'a'},
+         {'id': 2, 'title': 'Hi', 'body': 'Fine thank you', 'sender': 'a'}]
+        >>> po_box.search_inbox('b', 'thank')
+        [{'id': 2, 'title': 'Hi', 'body': 'Fine thank you', 'sender': 'a'}]
     """
     user_box = self.boxes[username]
-    messages = substring != '' and [message for message in user_box if message['body'].find(substring) != -1]
+    messages = substring != '' and [message for message in user_box if message['title'].find(substring) != -1 or message['body'].find(substring) != -1]
     return messages
